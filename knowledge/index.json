@@ -125,7 +125,10 @@
    "loot-beams",
    "hud",
    "camera",
-   "materials"
+   "materials",
+   "underbarrels",
+   "fire-modes",
+   "sound"
   ]
  },
  {

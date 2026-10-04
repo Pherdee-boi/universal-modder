@@ -15,7 +15,7 @@ agents:
 humans: ["@Pherdee-boi"]
 date: '2026-10-04'
 links: []
-tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, slide, mantle, ground-slam, projectiles, hooks, item-cards, loot-beams, hud, camera, materials]
+tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, slide, mantle, ground-slam, projectiles, hooks, item-cards, loot-beams, hud, camera, materials, underbarrels, fire-modes, sound]
 ---
 # BL3 weapons and movement in Borderlands 2 (Willow2 SDK mods)
 
@@ -30,6 +30,9 @@ tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, s
 > - UI/effects (added 2026-10-04): anointment and Maliwan second-element lines on item cards, Jakobs
 >   ricochet tracers, a tinted in-world Hyperion shield with a % in the HUD font, BL3-style rarity loot
 >   beams with a ground glow and a legendary drop sound.
+> - Later the same day: Vladof underbarrels on ARs, pistols and snipers (grenade/rocket launcher,
+>   shotgun, taser, zip rockets, double barrel, bipod) with own ammo, sounds and muzzle effects; true
+>   Dahl semi-auto; movement, shield and grenade anointments; a reworked Tediore MIRV/Chaser/turret.
 >
 > **BL3 Movement** adds slide and ground slam, with BL3-style camera work (slide FOV kick and tilt, slam
 > shake). A mantle exists but is off by default: from the SDK nothing can see a ledge ahead
@@ -187,6 +190,42 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
 - FOV: add on top of `PlayerController.DesiredFOV` (BL2's sprint FOV uses the same attribute) and
   re-read it whenever BL2 changes it. A slight camera roll: `PlayerController.Rotation.Roll`.
 
+**Changing how a gun fires, live (no part swap).**
+- **Any firing mode on any gun:** override `WillowWeapon.GetFiringModeDefinition` to return e.g. BL2's real
+  launcher mode `GD_Weap_Launchers.FiringModes.FM_Rocket_Vladof` on an AR or sniper, or the small AR rockets
+  `GD_Weap_AssaultRifle.FiringModes.FM_Rocket_Vladof` on a pistol.
+- **Attributes held every frame:** `ProjectilesPerShot`, `Spread`, `PerShotAccuracyImpulse` (kick),
+  `FireInterval`, `ClipSize`, `StatusEffectChanceModifier`, and the pawn's `GroundSpeed`. Re-read the gun's
+  own value whenever it differs from what you wrote (relative tolerance), and restore on stow, on weapon
+  switch and on mod disable. A shotgun: 8 pellets, Spread 7, kick 12 (BL2's Jakobs shotgun type is 7 / 7.4 /
+  11).
+- **Own ammo:** note `WillowWeapon.GetAmmoCount()` on deploy and give back the difference with `AddAmmo(n)`.
+  Setting `ClipSize` to the special shots removes BL2's reload prompt (the HUD compares rounds to
+  `ClipSize`).
+- **Element for a while:** `rebuild` with the type's `*_Elemental_Shock` part and save the original part in
+  the mod's settings, so a save taken mid-way is put right on the next hold.
+- **Spin-up barrels** fire slower until `WillowWeapon.BarrelSpinUpPercent` reaches 1 (the part's
+  `StartingSpinUpFireIntervalMultiplier`); hold it (and `MagazineSpinUpPercent`) at 1 for a steady rhythm.
+- **Aim-down-sights effects** are attribute effects applied by `ApplyAllZoomWeaponAttributeEffects` /
+  `RemoveAllZoomWeaponAttributeEffects`; re-apply your values in post-hooks on both (Gotcha 25).
+
+**Muzzle effects and sounds.**
+- **On the first-person gun:** construct a `ParticleSystemComponent`, `SetTemplate`,
+  `SetDepthPriorityGroup(weapon.FirstPersonMesh.DepthPriorityGroup)`, then
+  `weapon.FirstPersonMesh.AttachComponentToSocket(comp, WeaponTypeDefinition.MuzzleFlashSocket)`.
+  `SetTranslation` on it is relative to the socket (the socket sits in front of the barrel).
+  `DeactivateSystem` + `DetachComponent` to remove.
+- **Sounds:** `pawn.PlayAkEvent(AkEvent)`. Weapon equip clacks: `Ake_Obj_Pickup.Obj_Pickup_Equip.
+  Ak_Play_Obj_Pickup_Equip_{Pistol,Rifle,RL,Shotgun,SMG}`. Loops come in Play/Stop pairs (e.g.
+  `Ake_FX_Global.Ak_Play/Ak_Stop_FX_Elemental_*_StatusEffect_lp`); a loop without a Stop event (the Vladof
+  minigun `Ak_Play_Wep_Rifle_Vladof_Spin_Loop`) ends with its spin-down plus
+  `WillowWeapon.StopLoopingSounds()`. `WillowWeapon.PlayStartSpinningUpSound()` plays a gun's spin-up.
+
+**Shields, grenades and other equipped items.**
+- `WillowPawn.EquippedItems` holds the equipped shield / grenade mod / class mod / relic (tell them apart by
+  class). Items have `DefinitionData.UniqueId` like guns, and `StaticCalculateItemRarityLevel` for rarity.
+- Shield: `GetShieldStrength` / `GetMaxShieldStrength` / `SetShieldStrength` (Gotcha 27 for breaks).
+
 **Menus and startup.**
 - `WillowGFxMoviePressStart.extContinue()` = pressing a key on the title screen;
   `FrontendGFxMovie.LaunchSaveGame(PlayThrough)` = the Continue button. The 2K/Gearbox logos are
@@ -297,12 +336,32 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
     **Fix:** only act when `WorldInfo.GetMapName(False)` is `menumap` and there is no pawn.
 23. **Explosion damage lands after `Detonate()` returns,** so a "scale hits during this call" window
     misses them. **Fix:** key the bonus to the victim, with a short time window.
+24. **"Semi-auto" still fired full-auto while the button was held.** BL2 starts the next shot itself; pre-hooks
+    that refuse `WillowWeapon.ShouldRefire` or `BeginFire` didn't stop it (the native path doesn't go through
+    them). **Fix:** in a `WillowWeapon.ConsumeAmmo` post-hook (once per shot), call
+    `Weapon.ClearPendingFire(0)`: the gun stops as if the trigger were released and the next press fires again.
+25. **A chosen fire mode reverted while aiming.** The zoom attribute effects override the value until your
+    next per-frame write and shots fire in between. **Fix:** re-apply in post-hooks on
+    `ApplyAllZoomWeaponAttributeEffects` / `RemoveAllZoomWeaponAttributeEffects` and on every shot.
+26. **A borrowed homing throw (the Deliverance's) hit for 0 on other guns,** and a borrowed split throw (Baby
+    Maker) made one extra blast: their damage and children come from their own unique gun. **Fix:** catch your
+    throw in `WillowProjectile.InitializeFromDefinition` (post) and deal the damage yourself in an
+    `Explode` pre-hook (targets collected first). Projectiles that `Behavior_Fire` spawns are initialised
+    inside that call, so set a flag around it to recognise them.
+27. **`WillowPawn.OnShieldDepleted` never fired for the player from Python.** **Fix:** poll
+    `GetShieldStrength()` and treat a drop to 0 as the break.
+28. **A Tediore reload (the throw) never went through `WillowWeapon.BeginReload`,** so "rounds left at the
+    throw" was unknown. **Fix:** sample the held gun's `ReloadCnt` every frame and take the lowest value of
+    the last ~0.6 s at the throw.
+29. **Muzzle particles and repeating muzzle flashes:** a re-activated muzzle-flash particle on a socket
+    showed nothing, and launcher muzzle blasts read as a stray explosion; looping particles (shock sparks)
+    worked. Sound sold the underbarrel changes better than particles.
 
 ## Assets
 None. All visuals come from the game's own parts, projectiles, explosions and arm poses.
 
 ## Cost and time
-About four long sessions, roughly 100 human test rounds. Most time went into the Tediore turret (10 builds,
+About five long sessions, roughly 150 human test rounds. Most time went into the Tediore turret (10 builds,
 Gotchas 2 and 8) and the two slam freezes (Gotchas 3 and 4).
 
 ## Open questions
