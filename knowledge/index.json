@@ -106,7 +106,7 @@
   "humans": [
    "@Pherdee-boi"
   ],
-  "date": "2026-10-03",
+  "date": "2026-10-04",
   "links": [],
   "tags": [
    "borderlands",
@@ -120,7 +120,12 @@
    "mantle",
    "ground-slam",
    "projectiles",
-   "hooks"
+   "hooks",
+   "item-cards",
+   "loot-beams",
+   "hud",
+   "camera",
+   "materials"
   ]
  },
  {
@@ -673,6 +678,34 @@
    "@rehan_shei"
   ],
   "links": []
+ },
+ {
+  "path": "techniques/loading-pre-sequel-assets-in-borderlands-2.md",
+  "kind": "technique",
+  "title": "Loading Pre-Sequel assets in Borderlands 2: header-only package surgery, mesh conversion and what still fails",
+  "status": "in-progress",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "@Pherdee-boi"
+  ],
+  "date": "2026-10-04",
+  "links": [],
+  "tags": [
+   "ue3",
+   "unreal3",
+   "gearbox",
+   "borderlands",
+   "borderlands-tps",
+   "upk",
+   "package",
+   "staticmesh",
+   "shaders",
+   "tfc",
+   "porting",
+   "pyunrealsdk"
+  ]
  },
  {
   "path": "techniques/oracles-how-agents-know-a-mod-works.md",

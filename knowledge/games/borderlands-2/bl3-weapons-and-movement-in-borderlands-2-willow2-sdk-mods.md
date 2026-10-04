@@ -13,9 +13,9 @@ status: working
 agents:
 - Claude Code (Opus 5.5)
 humans: ["@Pherdee-boi"]
-date: '2026-10-03'
+date: '2026-10-04'
 links: []
-tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, slide, mantle, ground-slam, projectiles, hooks]
+tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, slide, mantle, ground-slam, projectiles, hooks, item-cards, loot-beams, hud, camera, materials]
 ---
 # BL3 weapons and movement in Borderlands 2 (Willow2 SDK mods)
 
@@ -27,7 +27,13 @@ tags: [borderlands, gearbox, ue3, pyunrealsdk, weapons, anointments, movement, s
 > - COV-style overheat on Bandit, Jakobs crit ricochets, Hyperion ADS shield;
 > - plus anointments.
 >
-> **BL3 Movement** adds slide, mantle and ground slam.
+> - UI/effects (added 2026-10-04): anointment and Maliwan second-element lines on item cards, Jakobs
+>   ricochet tracers, a tinted in-world Hyperion shield with a % in the HUD font, BL3-style rarity loot
+>   beams with a ground glow and a legendary drop sound.
+>
+> **BL3 Movement** adds slide and ground slam, with BL3-style camera work (slide FOV kick and tilt, slam
+> shake). A mantle exists but is off by default: from the SDK nothing can see a ledge ahead
+> (Gotcha 21).
 >
 > Every feature was verified by the human playing the real game, with the agent reading `unrealsdk.log`
 > between builds. No live in-game REPL was used (see Gotcha 1).
@@ -88,8 +94,14 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
 - **Burst:** `AutomaticBurstCount` is an attribute that BL2 recomputes on zoom. Re-apply it every tick if you
   override it.
 - **Zoom:** `ZoomState` takes the values `ZST_NotZoomed`, `ZST_ZoomingIn`, `ZST_Zoomed` and `ZST_ZoomingOut`.
-- **Rarity:** `StaticCalculateWeaponRarityLevel(DefinitionData)` gives rarity: 1 white … 4 purple, 5
-  legendary, 500+ special tiers (506 seen).
+- **Rarity:** `StaticCalculateWeaponRarityLevel(DefinitionData)` (items:
+  `WillowItem.StaticCalculateItemRarityLevel`). The authoritative meaning is BL2's own table,
+  `GlobalsDefinition.RarityLevelColors` in the data dump: 1 white, 2 green, 3 blue, 4 purple, **5 and 7-10
+  legendary** (a legendary-pool drop reported 9), **6 e-tech**, 500 pearlescent, 501 seraph, 503, 506
+  "rainbow". Don't assume "5 and up = legendary" (Gotcha 18).
+- **Fire timing:** shots inside a burst are spaced by the gun's `FireInterval` (an `Engine.Weapon`
+  attribute, read when each shot's refire timer starts); the pause after a burst is
+  `WillowWeapon.BurstInterval`. Both can be written per frame like any attribute (Gotcha 16).
 
 **Damage.**
 - **Enemies:** damage arrives in `WillowAIPawn.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum,
@@ -138,6 +150,48 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
 - `WillowGameViewportClient:PostRender(Canvas)` with `Canvas.SetPos/SetDrawColor/DrawRect(w, h,
   Canvas.DefaultTexture)` draws gauges.
 - `ui_utils.show_hud_message` for popups.
+- **Text in the game's own HUD font:** the Scaleform HUD movie is `pc.myHUD.HUDMovie`. Create an empty clip
+  (`CreateEmptyMovieClip`) and AS2 text fields in it with `GFxObject.Invoke("createTextField", ...)`, set
+  `html`/`embedFonts`, and write `htmlText` with `<font face="$WillowCompact">`. BL2's white text with a
+  black outline = 8 black copies offset by 1 px under the white field. Re-create it after map loads. The
+  HUD stage is 1280 x 720 with the reticle at its centre; the ammo number is `_root.p1.bullets.bullet_c`.
+- **Item cards:** every card (inventory, vendors, loot you look at) is an `ItemCardGFxObject`.
+  `SetItemCardEx(WPC, InventoryItem, ...)` / `SetItemCard(...)` tell you which item it shows;
+  `SetFunStats(FunStatsText)` is the red flavour block (HTML). Remember the item per card, then block
+  `SetFunStats` and re-issue it with extra `<font color>` lines.
+
+**Things in the world.**
+- **Mesh pieces:** construct a `StaticMeshComponent` with the pawn as outer, `pawn.AttachComponent` it,
+  then `SetAbsolute(True, True, True)`, `SetStaticMesh`, `SetMaterial(0, ...)`, and move it each frame with
+  `SetTranslation` / `SetRotation` / `SetScale3D`. Turn its collision off. Hold components through
+  `WeakPointer` and drop them all when the pawn changes (map load).
+- **Recoloured materials at runtime:** construct a `MaterialInstanceConstant`, `SetParent(material)`, then
+  `SetVectorParameterValue` / `SetTextureParameterValue` / `SetScalarParameterValue`. Parameter names are
+  the material's `MaterialExpression*Parameter` subobjects in the decompressed package; a parameter stored
+  with no name is set with the name `"None"` (the shield hex material's colour). Set
+  `ObjectFlags |= 0x4000` (RF_RootSet) on objects you construct so they survive map changes.
+- **Particles:** `WorldInfo.MyEmitterPool.SpawnEmitter(Template, Location, Rotation, ...)`. Beam2 tracers
+  take their ends from `SetBeamSourcePoint(i, P, 0)`, `SetBeamTargetPoint(i, P, 0)` and
+  `SetBeamEndPoint(i, P)` per emitter. Instance parameters: `SetVectorParameter` / `SetFloatParameter`
+  (BL2's loot sparkle `fx_shared_items.Particles.Part_LootableLocator` is coloured by `RColor`).
+- **Pickups:** loot on the ground is a `WillowPickup` with `Inventory` and `InventoryRarityLevel` (a
+  different scale from the item's own rarity). Dropped guns are rigid bodies: they arrive through
+  `PickupAtRest`, not `Landed` (Gotcha 19).
+- **Sound:** `actor.PlayAkEvent(AkEvent)` plays a Wwise event from that actor
+  (`Ake_UI.UI_Mission.Ak_Play_UI_Mission_Reward` makes a good "legendary dropped" sting).
+
+**Camera.**
+- `PlayerController.ClientPlayCameraAnim(Anim, Scale, Rate, BlendIn, BlendOut)` with BL2's always-loaded
+  camera anims: `Anim_CameraAnimations.Explosions.Canim_Explosion_{Minor,Medium,Large,WarriorEarthquake}`
+  and `Anim_CameraAnimations.Melee.Canim_*_Melee`. Startup has no `CameraShake` objects.
+- FOV: add on top of `PlayerController.DesiredFOV` (BL2's sprint FOV uses the same attribute) and
+  re-read it whenever BL2 changes it. A slight camera roll: `PlayerController.Rotation.Roll`.
+
+**Menus and startup.**
+- `WillowGFxMoviePressStart.extContinue()` = pressing a key on the title screen;
+  `FrontendGFxMovie.LaunchSaveGame(PlayThrough)` = the Continue button. The 2K/Gearbox logos are
+  `StartupMovies` in the user's `Documents/My Games/Borderlands 2/WillowGame/Config/WillowEngine.ini`
+  (comment them out; mods load after them, so a mod can't skip them).
 
 ## Build steps
 1. Install Willow2 Mod Manager v3.8 and launch once. Check `unrealsdk.log` for "pyunrealsdk … loaded" and the
@@ -160,6 +214,8 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
 - **Freezes and crashes:** the last log line before the hang located the failing call (Gotchas 4 and 5).
   `.dmp` files in `WillowGame/Logs` were parsed with the `minidump` package; one launch crash at engine init
   (before mods load) was judged unrelated.
+- The 2026-10-04 additions were verified the same way (item cards, loot beam colours and sound, tracers,
+  shield tint, camera effects). The mantle was judged unsatisfying by the human and turned off.
 - **Not verified:**
   - co-op/multiplayer;
   - other BL2 builds;
@@ -209,18 +265,50 @@ anointment, second element...) live in a mod settings JSON keyed by `DefinitionD
     `WillowGame/CookedPCConsole/*.upk` and the UE3 package tag `0x9E2A83C1`.
 12. **Old advice about `CallPostEdit(False)` wiping status effects** comes from the legacy SDK. In the new SDK,
     property writes don't post-edit unless you use `unrealsdk.unreal.notify_changes()`.
+13. **Crash on quit-to-menu** (access violation in pyunrealsdk) after holding `UObject`s across a map
+    change. **Fix:** hold anything cached as `unrealsdk.unreal.WeakPointer` and re-resolve it.
+14. **A hit counted twice:** two features each blocked `TakeDamage` and re-issued it with their own
+    multiplier. **Fix:** exactly one block-and-re-call damage hook that multiplies every bonus together.
+15. **Timers and regen kept running while paused.** **Fix:** a game clock that only advances while
+    `WorldInfo.Pauser` is None.
+16. **A damage ramp grew to absurd numbers.** It wrote the gun's damage attribute each frame and treated
+    "current differs from what I wrote by more than 0.01" as "BL2 recomputed it, take a new base". float32
+    rounding of large damage numbers exceeds 0.01, so the ramped value became the base every frame.
+    **Fix:** compare with a relative tolerance (1e-4), and restore saved bases unconditionally.
+17. **Loot beams invisible:** a flat mesh with a one-sided material, facing away. **Fix:** two
+    back-to-back faces.
+18. **Legendary beams came out purple:** rarity 9 fell into an "epic" bucket built from a guess. **Fix:**
+    use `GlobalsDefinition.RarityLevelColors` (Rarity bullet above). The same table showed that e-tech (6)
+    had been treated as legendary for anointments.
+19. **Drop sound never played:** it hung on `WillowPickup.Landed`, which rigid-body pickups never call.
+    **Fix:** `PickupAtRest`.
+20. **A "round glow" texture rendered as a square:** BL2's bullet-trail material reads one channel of each
+    texture through a static component mask and has no texture-shaped opacity (and GreyPack textures
+    keep a different shape per channel). **Fix:** a particle (`Part_LootableLocator` with `RColor`) instead
+    of a textured quad.
+21. **No mantle that feels like BL3's.** Nothing can see a ledge ahead: `Trace` never hits, `FastTrace`
+    always says blocked (Gotcha 2), and `Actor.SetLocation` refused even the pawn's own spot, so it can't
+    probe for free space. `NotifyFallingHitWall` only fires when (HitNormal . Velocity.SafeNormal) <
+    MinHitWall, so head-on jumps (mostly vertical velocity) rarely register even with MinHitWall 0.1.
+    Reacting to "pushing forward but not moving" detects walls, but without the ledge height every
+    version felt like a jump boost. **Fix:** none found; it ships off by default.
+22. **A save loaded in the middle of a game (crash):** a "continue my save" helper reacted to
+    `FrontendGFxMovie.NotifyAtMainMenu`, which also fires when the Mods menu is opened from the pause menu.
+    **Fix:** only act when `WorldInfo.GetMapName(False)` is `menumap` and there is no pawn.
+23. **Explosion damage lands after `Detonate()` returns,** so a "scale hits during this call" window
+    misses them. **Fix:** key the bonus to the victim, with a short time window.
 
 ## Assets
 None. All visuals come from the game's own parts, projectiles, explosions and arm poses.
 
 ## Cost and time
-About two long sessions, roughly 40 human test rounds. Most time went into the Tediore turret (10 builds,
+About four long sessions, roughly 100 human test rounds. Most time went into the Tediore turret (10 builds,
 Gotchas 2 and 8) and the two slam freezes (Gotchas 3 and 4).
 
 ## Open questions
-- Why do traces called from the SDK always report blocked/no-hit? A working mod-side line of sight would
-  simplify a lot.
-- Effects/UI pass: visible Jakobs ricochet shots via `Behavior_Fire`, anointment text on item cards.
+- Why do traces (and `SetLocation` as a probe) fail from the SDK? A working collision query would unlock
+  a real mantle and mod-side line of sight.
+- Porting Pre-Sequel assets: see `techniques/loading-pre-sequel-assets-in-borderlands-2.md`.
 - Per-legendary rules (keep the unique effect, add the manufacturer effect, or both).
 - Co-op: everything is host/single-player only. The `networking` library in the mod manager would be the
   starting point.
