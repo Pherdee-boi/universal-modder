@@ -1,0 +1,312 @@
+{
+ "1": {
+  "class_type": "VHS_LoadVideo",
+  "inputs": {
+   "video": "input.mp4",
+   "force_rate": 25,
+   "custom_width": 0,
+   "custom_height": 0,
+   "frame_load_cap": 0,
+   "skip_first_frames": 0,
+   "select_every_nth": 1,
+   "format": "AnimateDiff"
+  },
+  "_meta": {
+   "title": "1. TARGET VIDEO (upload here)"
+  }
+ },
+ "2": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "face.png"
+  },
+  "_meta": {
+   "title": "2. SOURCE FACE (clear, frontal photo)"
+  }
+ },
+ "3": {
+  "class_type": "LoadAudio",
+  "inputs": {
+   "audio": "speech.wav"
+  },
+  "_meta": {
+   "title": "3. NEW AUDIO for lipsync (stage C only)"
+  }
+ },
+ "4": {
+  "class_type": "ReActorOptions",
+  "inputs": {
+   "input_faces_order": "large-small",
+   "input_faces_index": "0",
+   "detect_gender_input": "no",
+   "source_faces_order": "large-small",
+   "source_faces_index": "0",
+   "detect_gender_source": "no",
+   "console_log_level": 1,
+   "restore_swapped_only": true
+  },
+  "_meta": {
+   "title": "Faces: pick who gets swapped"
+  }
+ },
+ "5": {
+  "class_type": "ReActorFaceBoost",
+  "inputs": {
+   "enabled": true,
+   "boost_model": "codeformer-v0.1.0.pth",
+   "interpolation": "Bicubic",
+   "visibility": 1.0,
+   "codeformer_weight": 0.6,
+   "restore_with_main_after": false
+  },
+  "_meta": {
+   "title": "Face Booster (sharper swap)"
+  }
+ },
+ "6": {
+  "class_type": "ReActorFaceSwapOpt",
+  "inputs": {
+   "enabled": true,
+   "swap_model": "inswapper_128.onnx",
+   "facedetection": "retinaface_resnet50",
+   "face_restore_model": "none",
+   "face_restore_visibility": 1.0,
+   "codeformer_weight": 0.5,
+   "input_image": [
+    "1",
+    0
+   ],
+   "source_image": [
+    "2",
+    0
+   ],
+   "options": [
+    "4",
+    0
+   ],
+   "face_boost": [
+    "5",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "A. Face swap (per-frame detect + track)"
+  }
+ },
+ "7": {
+  "class_type": "DownloadAndLoadLivePortraitModels",
+  "inputs": {
+   "precision": "auto",
+   "mode": "human"
+  },
+  "_meta": {
+   "title": "LivePortrait models"
+  }
+ },
+ "8": {
+  "class_type": "LivePortraitLoadCropper",
+  "inputs": {
+   "onnx_device": "CUDA",
+   "keep_model_loaded": true,
+   "detection_threshold": 0.5
+  },
+  "_meta": {
+   "title": "LP face detector (InsightFace)"
+  }
+ },
+ "9": {
+  "class_type": "LivePortraitCropper",
+  "inputs": {
+   "dsize": 512,
+   "scale": 2.3,
+   "vx_ratio": 0.0,
+   "vy_ratio": -0.125,
+   "face_index": 0,
+   "face_index_order": "large-small",
+   "rotate": true,
+   "pipeline": [
+    "7",
+    0
+   ],
+   "cropper": [
+    "8",
+    0
+   ],
+   "source_image": [
+    "6",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "Crop swapped face"
+  }
+ },
+ "10": {
+  "class_type": "LivePortraitCropper",
+  "inputs": {
+   "dsize": 512,
+   "scale": 2.3,
+   "vx_ratio": 0.0,
+   "vy_ratio": -0.125,
+   "face_index": 0,
+   "face_index_order": "large-small",
+   "rotate": true,
+   "pipeline": [
+    "7",
+    0
+   ],
+   "cropper": [
+    "8",
+    0
+   ],
+   "source_image": [
+    "1",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "Crop original face (driver)"
+  }
+ },
+ "11": {
+  "class_type": "LivePortraitProcess",
+  "inputs": {
+   "lip_zero": false,
+   "lip_zero_threshold": 0.03,
+   "stitching": true,
+   "delta_multiplier": 1.0,
+   "mismatch_method": "constant",
+   "relative_motion_mode": "source_video_smoothed",
+   "driving_smooth_observation_variance": 3e-06,
+   "expression_friendly": false,
+   "expression_friendly_multiplier": 1.0,
+   "pipeline": [
+    "7",
+    0
+   ],
+   "crop_info": [
+    "9",
+    1
+   ],
+   "source_image": [
+    "9",
+    0
+   ],
+   "driving_images": [
+    "10",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "B. Expression + head-motion transfer"
+  }
+ },
+ "12": {
+  "class_type": "LivePortraitComposite",
+  "inputs": {
+   "source_image": [
+    "6",
+    0
+   ],
+   "cropped_image": [
+    "11",
+    0
+   ],
+   "liveportrait_out": [
+    "11",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "Paste back (bypass = skip stage B)"
+  }
+ },
+ "13": {
+  "class_type": "VHS_VideoCombine",
+  "inputs": {
+   "frame_rate": 25,
+   "loop_count": 0,
+   "filename_prefix": "faceswap",
+   "format": "video/h264-mp4",
+   "pix_fmt": "yuv420p",
+   "crf": 17,
+   "save_metadata": true,
+   "pingpong": false,
+   "save_output": true,
+   "images": [
+    "12",
+    0
+   ],
+   "audio": [
+    "1",
+    2
+   ]
+  },
+  "_meta": {
+   "title": "OUTPUT 1: swapped video + original audio"
+  }
+ },
+ "14": {
+  "class_type": "VideoLengthAdjuster",
+  "inputs": {
+   "mode": "pingpong",
+   "fps": 25.0,
+   "silent_padding_sec": 0.5,
+   "images": [
+    "12",
+    0
+   ],
+   "audio": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "Match video to audio length"
+  }
+ },
+ "15": {
+  "class_type": "LatentSyncNode",
+  "inputs": {
+   "seed": 1247,
+   "lips_expression": 1.5,
+   "inference_steps": 20,
+   "images": [
+    "14",
+    0
+   ],
+   "audio": [
+    "14",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "C. Lipsync to new audio (LatentSync)"
+  }
+ },
+ "16": {
+  "class_type": "VHS_VideoCombine",
+  "inputs": {
+   "frame_rate": 25,
+   "loop_count": 0,
+   "filename_prefix": "faceswap_lipsync",
+   "format": "video/h264-mp4",
+   "pix_fmt": "yuv420p",
+   "crf": 17,
+   "save_metadata": true,
+   "pingpong": false,
+   "save_output": true,
+   "images": [
+    "15",
+    0
+   ],
+   "audio": [
+    "15",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "OUTPUT 2: swapped + lipsynced"
+  }
+ }
+}

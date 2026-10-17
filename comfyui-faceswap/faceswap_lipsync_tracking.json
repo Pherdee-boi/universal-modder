@@ -1,0 +1,1159 @@
+{
+ "id": "faceswap-lipsync-tracking",
+ "revision": 0,
+ "last_node_id": 18,
+ "last_link_id": 25,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "VHS_LoadVideo",
+   "pos": [
+    60,
+    60
+   ],
+   "size": [
+    330,
+    400
+   ],
+   "flags": {},
+   "order": 0,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      1,
+      10
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "frame_count",
+     "type": "INT",
+     "links": null,
+     "slot_index": 1
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      19
+     ],
+     "slot_index": 2
+    },
+    {
+     "name": "video_info",
+     "type": "VHS_VIDEOINFO",
+     "links": null,
+     "slot_index": 3
+    }
+   ],
+   "title": "1. TARGET VIDEO (upload here)",
+   "properties": {
+    "Node name for S&R": "VHS_LoadVideo"
+   },
+   "widgets_values": {
+    "video": "input.mp4",
+    "force_rate": 25,
+    "custom_width": 0,
+    "custom_height": 0,
+    "frame_load_cap": 0,
+    "skip_first_frames": 0,
+    "select_every_nth": 1,
+    "format": "AnimateDiff",
+    "choose video to upload": "image",
+    "videopreview": {
+     "hidden": false,
+     "paused": false,
+     "params": {
+      "filename": "input.mp4",
+      "type": "input",
+      "format": "video/mp4",
+      "force_rate": 25,
+      "frame_load_cap": 0,
+      "skip_first_frames": 0,
+      "select_every_nth": 1
+     }
+    }
+   }
+  },
+  {
+   "id": 2,
+   "type": "LoadImage",
+   "pos": [
+    60,
+    390
+   ],
+   "size": [
+    330,
+    330
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      2
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": null,
+     "slot_index": 1
+    }
+   ],
+   "title": "2. SOURCE FACE (clear, frontal photo)",
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "face.png",
+    "image"
+   ]
+  },
+  {
+   "id": 3,
+   "type": "LoadAudio",
+   "pos": [
+    60,
+    720
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "AUDIO",
+     "type": "AUDIO",
+     "links": [
+      21
+     ],
+     "slot_index": 0
+    }
+   ],
+   "title": "3. NEW AUDIO for lipsync (stage C only)",
+   "properties": {
+    "Node name for S&R": "LoadAudio"
+   },
+   "widgets_values": [
+    "speech.wav",
+    "",
+    ""
+   ]
+  },
+  {
+   "id": 4,
+   "type": "ReActorOptions",
+   "pos": [
+    500,
+    60
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "OPTIONS",
+     "type": "OPTIONS",
+     "links": [
+      3
+     ],
+     "slot_index": 0
+    }
+   ],
+   "title": "Faces: pick who gets swapped",
+   "properties": {
+    "Node name for S&R": "ReActorOptions"
+   },
+   "widgets_values": [
+    "large-small",
+    "0",
+    "no",
+    "large-small",
+    "0",
+    "no",
+    1,
+    true
+   ]
+  },
+  {
+   "id": 5,
+   "type": "ReActorFaceBoost",
+   "pos": [
+    500,
+    390
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "FACE_BOOST",
+     "type": "FACE_BOOST",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "title": "Face Booster (sharper swap)",
+   "properties": {
+    "Node name for S&R": "ReActorFaceBoost"
+   },
+   "widgets_values": [
+    true,
+    "codeformer-v0.1.0.pth",
+    "Bicubic",
+    1.0,
+    0.6,
+    false
+   ]
+  },
+  {
+   "id": 6,
+   "type": "ReActorFaceSwapOpt",
+   "pos": [
+    940,
+    60
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "input_image",
+     "type": "IMAGE",
+     "link": 1
+    },
+    {
+     "name": "source_image",
+     "type": "IMAGE",
+     "link": 2,
+     "shape": 7
+    },
+    {
+     "name": "options",
+     "type": "OPTIONS",
+     "link": 3,
+     "shape": 7
+    },
+    {
+     "name": "face_boost",
+     "type": "FACE_BOOST",
+     "link": 4,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "SWAPPED_IMAGE",
+     "type": "IMAGE",
+     "links": [
+      7,
+      15
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "FACE_MODEL",
+     "type": "FACE_MODEL",
+     "links": null,
+     "slot_index": 1
+    },
+    {
+     "name": "ORIGINAL_IMAGE",
+     "type": "IMAGE",
+     "links": null,
+     "slot_index": 2
+    }
+   ],
+   "title": "A. Face swap (per-frame detect + track)",
+   "properties": {
+    "Node name for S&R": "ReActorFaceSwapOpt"
+   },
+   "widgets_values": [
+    true,
+    "inswapper_128.onnx",
+    "retinaface_resnet50",
+    "none",
+    1.0,
+    0.5
+   ]
+  },
+  {
+   "id": 7,
+   "type": "DownloadAndLoadLivePortraitModels",
+   "pos": [
+    500,
+    1050
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "live_portrait_pipe",
+     "type": "LIVEPORTRAITPIPE",
+     "links": [
+      5,
+      8,
+      11
+     ],
+     "slot_index": 0
+    }
+   ],
+   "title": "LivePortrait models",
+   "properties": {
+    "Node name for S&R": "DownloadAndLoadLivePortraitModels"
+   },
+   "widgets_values": [
+    "auto",
+    "human"
+   ]
+  },
+  {
+   "id": 8,
+   "type": "LivePortraitLoadCropper",
+   "pos": [
+    500,
+    1380
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "cropper",
+     "type": "LPCROPPER",
+     "links": [
+      6,
+      9
+     ],
+     "slot_index": 0
+    }
+   ],
+   "title": "LP face detector (InsightFace)",
+   "properties": {
+    "Node name for S&R": "LivePortraitLoadCropper"
+   },
+   "widgets_values": [
+    "CUDA",
+    true,
+    0.5
+   ]
+  },
+  {
+   "id": 9,
+   "type": "LivePortraitCropper",
+   "pos": [
+    940,
+    1050
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pipeline",
+     "type": "LIVEPORTRAITPIPE",
+     "link": 5
+    },
+    {
+     "name": "cropper",
+     "type": "LPCROPPER",
+     "link": 6
+    },
+    {
+     "name": "source_image",
+     "type": "IMAGE",
+     "link": 7,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "cropped_image",
+     "type": "IMAGE",
+     "links": [
+      13
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "crop_info",
+     "type": "CROPINFO",
+     "links": [
+      12
+     ],
+     "slot_index": 1
+    }
+   ],
+   "title": "Crop swapped face",
+   "properties": {
+    "Node name for S&R": "LivePortraitCropper"
+   },
+   "widgets_values": [
+    512,
+    2.3,
+    0.0,
+    -0.125,
+    0,
+    "large-small",
+    true
+   ]
+  },
+  {
+   "id": 10,
+   "type": "LivePortraitCropper",
+   "pos": [
+    940,
+    1380
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pipeline",
+     "type": "LIVEPORTRAITPIPE",
+     "link": 8
+    },
+    {
+     "name": "cropper",
+     "type": "LPCROPPER",
+     "link": 9
+    },
+    {
+     "name": "source_image",
+     "type": "IMAGE",
+     "link": 10,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "cropped_image",
+     "type": "IMAGE",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "crop_info",
+     "type": "CROPINFO",
+     "links": null,
+     "slot_index": 1
+    }
+   ],
+   "title": "Crop original face (driver)",
+   "properties": {
+    "Node name for S&R": "LivePortraitCropper"
+   },
+   "widgets_values": [
+    512,
+    2.3,
+    0.0,
+    -0.125,
+    0,
+    "large-small",
+    true
+   ]
+  },
+  {
+   "id": 11,
+   "type": "LivePortraitProcess",
+   "pos": [
+    1380,
+    1050
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pipeline",
+     "type": "LIVEPORTRAITPIPE",
+     "link": 11
+    },
+    {
+     "name": "crop_info",
+     "type": "CROPINFO",
+     "link": 12
+    },
+    {
+     "name": "source_image",
+     "type": "IMAGE",
+     "link": 13,
+     "shape": 7
+    },
+    {
+     "name": "driving_images",
+     "type": "IMAGE",
+     "link": 14
+    }
+   ],
+   "outputs": [
+    {
+     "name": "cropped_image",
+     "type": "IMAGE",
+     "links": [
+      16
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "output",
+     "type": "LP_OUT",
+     "links": [
+      17
+     ],
+     "slot_index": 1
+    }
+   ],
+   "title": "B. Expression + head-motion transfer",
+   "properties": {
+    "Node name for S&R": "LivePortraitProcess"
+   },
+   "widgets_values": [
+    false,
+    0.03,
+    true,
+    1.0,
+    "constant",
+    "source_video_smoothed",
+    3e-06,
+    false,
+    1.0
+   ]
+  },
+  {
+   "id": 12,
+   "type": "LivePortraitComposite",
+   "pos": [
+    1820,
+    1050
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "source_image",
+     "type": "IMAGE",
+     "link": 15,
+     "shape": 7
+    },
+    {
+     "name": "cropped_image",
+     "type": "IMAGE",
+     "link": 16
+    },
+    {
+     "name": "liveportrait_out",
+     "type": "LP_OUT",
+     "link": 17
+    }
+   ],
+   "outputs": [
+    {
+     "name": "full_images",
+     "type": "IMAGE",
+     "links": [
+      18,
+      20
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "mask",
+     "type": "MASK",
+     "links": null,
+     "slot_index": 1
+    }
+   ],
+   "title": "Paste back (bypass = skip stage B)",
+   "properties": {
+    "Node name for S&R": "LivePortraitComposite"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 13,
+   "type": "VHS_VideoCombine",
+   "pos": [
+    2260,
+    1050
+   ],
+   "size": [
+    330,
+    420
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 18
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 19,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "Filenames",
+     "type": "VHS_FILENAMES",
+     "links": null,
+     "slot_index": 0
+    }
+   ],
+   "title": "OUTPUT 1: swapped video + original audio",
+   "properties": {
+    "Node name for S&R": "VHS_VideoCombine"
+   },
+   "widgets_values": {
+    "frame_rate": 25,
+    "loop_count": 0,
+    "filename_prefix": "faceswap",
+    "format": "video/h264-mp4",
+    "pix_fmt": "yuv420p",
+    "crf": 17,
+    "save_metadata": true,
+    "pingpong": false,
+    "save_output": true,
+    "videopreview": {
+     "hidden": false,
+     "paused": false,
+     "params": {
+      "filename": "faceswap.mp4",
+      "subfolder": "",
+      "type": "output",
+      "format": "video/h264-mp4",
+      "frame_rate": 25
+     }
+    }
+   }
+  },
+  {
+   "id": 14,
+   "type": "VideoLengthAdjuster",
+   "pos": [
+    2260,
+    1710
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 20
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 21,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      22
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      23
+     ],
+     "slot_index": 1
+    }
+   ],
+   "title": "Match video to audio length",
+   "properties": {
+    "Node name for S&R": "VideoLengthAdjuster"
+   },
+   "widgets_values": [
+    "pingpong",
+    25.0,
+    0.5
+   ]
+  },
+  {
+   "id": 15,
+   "type": "LatentSyncNode",
+   "pos": [
+    2700,
+    1710
+   ],
+   "size": [
+    360,
+    260
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 22
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 23,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      24
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "links": [
+      25
+     ],
+     "slot_index": 1
+    }
+   ],
+   "title": "C. Lipsync to new audio (LatentSync)",
+   "properties": {
+    "Node name for S&R": "LatentSyncNode"
+   },
+   "widgets_values": [
+    1247,
+    "randomize",
+    1.5,
+    20
+   ]
+  },
+  {
+   "id": 16,
+   "type": "VHS_VideoCombine",
+   "pos": [
+    3140,
+    1710
+   ],
+   "size": [
+    330,
+    420
+   ],
+   "flags": {},
+   "order": 15,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 24
+    },
+    {
+     "name": "audio",
+     "type": "AUDIO",
+     "link": 25,
+     "shape": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "Filenames",
+     "type": "VHS_FILENAMES",
+     "links": null,
+     "slot_index": 0
+    }
+   ],
+   "title": "OUTPUT 2: swapped + lipsynced",
+   "properties": {
+    "Node name for S&R": "VHS_VideoCombine"
+   },
+   "widgets_values": {
+    "frame_rate": 25,
+    "loop_count": 0,
+    "filename_prefix": "faceswap_lipsync",
+    "format": "video/h264-mp4",
+    "pix_fmt": "yuv420p",
+    "crf": 17,
+    "save_metadata": true,
+    "pingpong": false,
+    "save_output": true,
+    "videopreview": {
+     "hidden": false,
+     "paused": false,
+     "params": {
+      "filename": "faceswap_lipsync.mp4",
+      "subfolder": "",
+      "type": "output",
+      "format": "video/h264-mp4",
+      "frame_rate": 25
+     }
+    }
+   }
+  },
+  {
+   "id": 17,
+   "type": "Note",
+   "pos": [
+    60,
+    1050
+   ],
+   "size": [
+    420,
+    220
+   ],
+   "flags": {},
+   "order": 99,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [],
+   "title": "Read me",
+   "properties": {},
+   "widgets_values": [
+    "HOW TO USE\n1. Upload video, face photo, audio in the three INPUTS nodes.\n2. Test with frame_load_cap = 50 first.\n3. Queue. OUTPUT 1 = swap (+LivePortrait), OUTPUT 2 = + lipsync.\nSkip a stage: select its node(s), Ctrl+B (bypass). No new audio? Bypass LatentSync + OUTPUT 2 + 'Match video to audio length'."
+   ]
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   6,
+   0,
+   "IMAGE"
+  ],
+  [
+   2,
+   2,
+   0,
+   6,
+   1,
+   "IMAGE"
+  ],
+  [
+   3,
+   4,
+   0,
+   6,
+   2,
+   "OPTIONS"
+  ],
+  [
+   4,
+   5,
+   0,
+   6,
+   3,
+   "FACE_BOOST"
+  ],
+  [
+   5,
+   7,
+   0,
+   9,
+   0,
+   "LIVEPORTRAITPIPE"
+  ],
+  [
+   6,
+   8,
+   0,
+   9,
+   1,
+   "LPCROPPER"
+  ],
+  [
+   7,
+   6,
+   0,
+   9,
+   2,
+   "IMAGE"
+  ],
+  [
+   8,
+   7,
+   0,
+   10,
+   0,
+   "LIVEPORTRAITPIPE"
+  ],
+  [
+   9,
+   8,
+   0,
+   10,
+   1,
+   "LPCROPPER"
+  ],
+  [
+   10,
+   1,
+   0,
+   10,
+   2,
+   "IMAGE"
+  ],
+  [
+   11,
+   7,
+   0,
+   11,
+   0,
+   "LIVEPORTRAITPIPE"
+  ],
+  [
+   12,
+   9,
+   1,
+   11,
+   1,
+   "CROPINFO"
+  ],
+  [
+   13,
+   9,
+   0,
+   11,
+   2,
+   "IMAGE"
+  ],
+  [
+   14,
+   10,
+   0,
+   11,
+   3,
+   "IMAGE"
+  ],
+  [
+   15,
+   6,
+   0,
+   12,
+   0,
+   "IMAGE"
+  ],
+  [
+   16,
+   11,
+   0,
+   12,
+   1,
+   "IMAGE"
+  ],
+  [
+   17,
+   11,
+   1,
+   12,
+   2,
+   "LP_OUT"
+  ],
+  [
+   18,
+   12,
+   0,
+   13,
+   0,
+   "IMAGE"
+  ],
+  [
+   19,
+   1,
+   2,
+   13,
+   1,
+   "AUDIO"
+  ],
+  [
+   20,
+   12,
+   0,
+   14,
+   0,
+   "IMAGE"
+  ],
+  [
+   21,
+   3,
+   0,
+   14,
+   1,
+   "AUDIO"
+  ],
+  [
+   22,
+   14,
+   0,
+   15,
+   0,
+   "IMAGE"
+  ],
+  [
+   23,
+   14,
+   1,
+   15,
+   1,
+   "AUDIO"
+  ],
+  [
+   24,
+   15,
+   0,
+   16,
+   0,
+   "IMAGE"
+  ],
+  [
+   25,
+   15,
+   1,
+   16,
+   1,
+   "AUDIO"
+  ]
+ ],
+ "groups": [
+  {
+   "id": 1,
+   "title": "INPUTS",
+   "bounding": [
+    40,
+    -10,
+    400,
+    990
+   ],
+   "color": "#3f789e",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 2,
+   "title": "A. FACE SWAP (ReActor)",
+   "bounding": [
+    480,
+    -10,
+    840,
+    660
+   ],
+   "color": "#8A8",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 3,
+   "title": "B. EXPRESSION + MOTION (LivePortrait) - bypass 'Paste back' to skip",
+   "bounding": [
+    480,
+    980,
+    2160,
+    660
+   ],
+   "color": "#b58b2a",
+   "font_size": 24,
+   "flags": {}
+  },
+  {
+   "id": 4,
+   "title": "C. LIPSYNC (LatentSync) - bypass LatentSync + OUTPUT 2 to skip",
+   "bounding": [
+    2240,
+    1640,
+    1280,
+    330
+   ],
+   "color": "#a1309b",
+   "font_size": 24,
+   "flags": {}
+  }
+ ],
+ "config": {},
+ "extra": {
+  "ds": {
+   "scale": 0.6,
+   "offset": [
+    0,
+    0
+   ]
+  }
+ },
+ "version": 0.4
+}
