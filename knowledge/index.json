@@ -1,5 +1,41 @@
 [
  {
+  "path": "games/0-a-d/meteor-strike-god-power-r28.md",
+  "kind": "game",
+  "title": "Meteor strike god power for temples in 0 A.D. R28",
+  "game": "0 A.D.",
+  "games_also": [],
+  "game_version": "0.28.0 (Release 28 \"Boiorix\", build a2cae4d69f), standalone Windows installer",
+  "platform": "windows",
+  "engine": "unknown",
+  "route": "data",
+  "tools": [
+   "Python zipfile (to read public.zip)",
+   "Pillow (procedural textures)",
+   "um win (screenshots, input)",
+   "pyrogenesis -autostart"
+  ],
+  "anti_cheat": "none; open-source game. Kept to single-player; multiplayer only works if every player has the mod.",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-18",
+  "links": [],
+  "tags": [
+   "pyrogenesis",
+   "god-power",
+   "area-damage",
+   "projectile",
+   "gui-command",
+   "targeting",
+   "particles",
+   "pyromod",
+   "javascript"
+  ]
+ },
+ {
   "path": "games/age-of-empires-ii-de/san-franciscans-civ.md",
   "kind": "game",
   "title": "San Franciscans: a new civilization for Age of Empires II DE with units rendered from 3D",
@@ -768,6 +804,56 @@
    "entity-spawner",
    "chat",
    "ai-game-master"
+  ]
+ },
+ {
+  "path": "games/batman-arkham-city/4k-cutscenes-usm-remux-stereo-patch-x265-sidecar.md",
+  "kind": "game",
+  "title": "4K 60 fps pre-rendered cutscenes for Arkham City (CRI USM remux, stereo-check patch, x265 sidecar playback via BmSDK)",
+  "game": "Batman: Arkham City",
+  "games_also": [],
+  "game_version": "Game of the Year Edition, Steam, 32-bit DX11, BmSDK v0.21.0, CRI Movie PCx86 2.82rs1",
+  "platform": "windows",
+  "engine": "unreal",
+  "route": "native-hook",
+  "tools": [
+   "BmSDK v0.21.0",
+   "ffmpeg 7 (mpeg1video, libx265, hevc_nvenc)",
+   "Python (own USM parser/muxer)",
+   "capstone (Python)",
+   "Frida 17",
+   "fxc /dumpbin"
+  ],
+  "anti_cheat": "none (single-player); the Steam exe's code is SteamStub-encrypted on disk, so it was read from the running process and patched in memory, never on disk",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-18",
+  "links": [
+   "https://github.com/Team-BmSDK/BmSDK-AC",
+   "knowledge/games/batman-arkham-city/split-screen-co-op-fixes-for-arkham-city-bmsdk-c-scripts-cam.md"
+  ],
+  "tags": [
+   "cutscenes",
+   "fmv",
+   "video",
+   "4k",
+   "cri",
+   "usm",
+   "sofdec",
+   "mpeg-1",
+   "scaleform",
+   "gfx-video",
+   "stereo-3d",
+   "side-by-side",
+   "x265",
+   "hevc",
+   "ffmpeg",
+   "bmsdk",
+   "detour",
+   "unreal-engine-3"
   ]
  },
  {
@@ -2369,6 +2455,50 @@
   ]
  },
  {
+  "path": "games/fallout-new-vegas/ai-companion-in-fallout-new-vegas-through-an-xnvse-jip-file-.md",
+  "kind": "game",
+  "title": "AI companion in Fallout: New Vegas through an xNVSE + JIP file bridge, and the batch-script traps that crash NVSE",
+  "game": "Fallout: New Vegas",
+  "games_also": [
+   "Valheim"
+  ],
+  "game_version": "steam 22380, buildid 1510068, FalloutNV.exe 1.4.0.525 (32-bit, not 4GB-patched)",
+  "platform": "windows",
+  "engine": "creation",
+  "route": "loader-api",
+  "tools": [
+   "xNVSE 6.4.9",
+   "JIP LN NVSE 57.30",
+   "Ollama (qwen3-abliterated 4B)",
+   "kokoro-onnx (Kokoro-82M)",
+   "onnx-asr (Parakeet TDT 0.6B v2)",
+   "s2.cpp (Fish S2 Pro q6_k, optional voice)"
+  ],
+  "anti_cheat": "none (single-player); new character, saves backed up before the first modded launch",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "Culp"
+  ],
+  "date": "2026-10-18",
+  "links": [
+   "../../techniques/bridge-contracts-ownership-units-and-lifecycle.md"
+  ],
+  "tags": [
+   "ai-companion",
+   "llm",
+   "tts",
+   "speech-recognition",
+   "file-bridge",
+   "xnvse",
+   "jip-ln",
+   "batch-script",
+   "crash"
+  ]
+ },
+ {
   "path": "games/far-cry-6/dunia-engine-modding-and-swf-format.md",
   "kind": "game",
   "title": "Far Cry 6 \u00e2\u20ac\u201d Dunia engine modding and the SWF/FEU UI format",
@@ -2530,6 +2660,48 @@
    "performance-mods",
    "distant-horizons",
    "chunky"
+  ]
+ },
+ {
+  "path": "games/ghostrunner/double-jump-flip-bcandoublejump-on-playercharacter.md",
+  "kind": "game",
+  "title": "Native double jump and infinite skill energy with a full HUD meter",
+  "game": "Ghostrunner",
+  "games_also": [],
+  "game_version": "Steam app 1139900, installed build 9002517",
+  "platform": "windows",
+  "engine": "unreal",
+  "route": "native-hook",
+  "tools": [
+   "UE4SS v3.0.1 (log: 3.0.1 Beta #0, Git SHA d935b5b)",
+   "Python 3.12.14",
+   "Capstone 5.0.9",
+   "Windows process-memory APIs",
+   "universal-modder 0.2.0",
+   "ffmpeg gfxcapture"
+  ],
+  "anti_cheat": "None detected by the bounded um install scan; single-player. Keep modded runs off leaderboards (Kill Run, speedrun boards)",
+  "status": "working",
+  "agents": [
+   "WorkBuddy AI (DeepSeek V4.1)",
+   "Codex (GPT-6)"
+  ],
+  "humans": [],
+  "date": "2026-10-18",
+  "links": [
+   "https://github.com/UE4SS-RE/RE-UE4SS",
+   "https://github.com/rehan-remade/universal-modder/pull/359"
+  ],
+  "tags": [
+   "ghostrunner",
+   "unreal",
+   "ue4ss",
+   "lua",
+   "reflection",
+   "double-jump",
+   "skill-energy",
+   "hud",
+   "native-patch"
   ]
  },
  {
@@ -5763,6 +5935,43 @@
   ]
  },
  {
+  "path": "games/skyrim-special-edition/rebuilding-a-cut-gatekeeper-with-generated-plugin-records-di.md",
+  "kind": "game",
+  "title": "Rebuilding a cut gatekeeper with generated plugin records: dialogue branches, shared voice lines, force-greets",
+  "game": "Skyrim Special Edition",
+  "games_also": [],
+  "game_version": "1.7.104 (Steam), Creation Kit 1.7.99; no SKSE needed",
+  "platform": "windows",
+  "engine": "creation",
+  "route": "data",
+  "tools": [
+   "Python plugin writer (own, ~600 lines)",
+   "Creation Kit PapyrusCompiler",
+   "SSEEdit (read-only checks)",
+   "LipGenerator + FonixData.cdf",
+   "MO2 2.5.2"
+  ],
+  "anti_cheat": "none (single-player)",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [],
+  "date": "2026-10-18",
+  "links": [],
+  "tags": [
+   "dialogue",
+   "quests",
+   "papyrus",
+   "force-greet",
+   "shared-info",
+   "voice-files",
+   "esl",
+   "cut-content",
+   "packages"
+  ]
+ },
+ {
   "path": "games/star-wars-battlefront-ii-2005/porting-a-skinned-starcraft-ii-character-onto-the-swbf2-2005.md",
   "kind": "game",
   "title": "Porting a skinned StarCraft II character onto the SWBF2 (2005) infantry skeleton",
@@ -8500,6 +8709,59 @@
    "skeletal-animation",
    "model-conversion",
    "team-colour"
+  ]
+ },
+ {
+  "path": "techniques/crysis-remastered-data-paks-cryengine-2-chr-0x745-nanosuit-s.md",
+  "kind": "technique",
+  "title": "Crysis Remastered data: paks, CryEngine 2 .chr 0x745, nanosuit shader modes and suit values",
+  "game": "Crysis Remastered",
+  "games_also": [],
+  "game_version": "Steam appid 1715130, files on disk 2026-10-17 (Bin64\\CrysisRemastered.exe 34,582,872 bytes, SHA-256 336c95e1c2d1...)",
+  "platform": "windows",
+  "engine": "cryengine",
+  "route": "asset-only",
+  "tools": [
+   "Python 3.12 (uv), stdlib zipfile/struct + numpy + Pillow",
+   "ffmpeg (MPEG-1 Layer II decode)",
+   "Blender 5.1 (glTF import check)",
+   "cgf-converter 2.0.0 (tried, see Gotcha 3)",
+   "Ghidra 12 (exe section check only)"
+  ],
+  "anti_cheat": "none (single player). The exe is wrapped in Steam DRM with an encrypted .text; it was not unpacked or modified, and every value here comes from shipped plain-text files",
+  "status": "working",
+  "agents": [
+   "Claude Code (Opus 5.5)"
+  ],
+  "humans": [
+   "ovROG"
+  ],
+  "date": "2026-10-18",
+  "links": [
+   "https://github.com/Markemp/Cryengine-Converter"
+  ],
+  "tags": [
+   "cryengine2",
+   "crysis",
+   "crysis-remastered",
+   "pak",
+   "zip",
+   "chr",
+   "cgf",
+   "cdf",
+   "mtl",
+   "chunk-file",
+   "skinning",
+   "morph-targets",
+   "gltf",
+   "split-dds",
+   "fsb4",
+   "fmod",
+   "cfx",
+   "shaders",
+   "nanosuit",
+   "cvars",
+   "lua"
   ]
  },
  {
