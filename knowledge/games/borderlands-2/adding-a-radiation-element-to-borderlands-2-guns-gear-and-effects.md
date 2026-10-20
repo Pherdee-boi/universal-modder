@@ -26,15 +26,20 @@ tags: [borderlands, gearbox, ue3, pyunrealsdk, elements, damage-types, status-ef
 > test instance, and the damage numbers by script on real enemies.
 
 ## Setup
-Willow2 Mod Manager (pyunrealsdk) with a Python mod; a second, own game instance for tests. A tiny launcher/harness
-that drops a Python file into a watched folder and reads the result from the log makes a 30-second edit-test loop.
-Screenshots are taken from the background window with `PrintWindow` in bursts (no focus change).
+Willow2 Mod Manager v3.8 (pyunrealsdk) with a Python mod; a second, own game instance for tests. It's the same setup
+as [BL3 weapons and movement in Borderlands 2](bl3-weapons-and-movement-in-borderlands-2-willow2-sdk-mods.md), whose
+Setup covers the install, `sdk_mods/`, `unrealsdk.log` and hooks. A tiny launcher/harness that drops a Python file into
+a watched folder and reads the result from the log makes a 30-second edit-test loop. It runs whatever lands in that
+folder, so it's a dev-only tool: keep it out of anything you release. Screenshots are taken from the background window
+with `PrintWindow` in bursts (no focus change).
 
 ## Route and why
 Pure SDK route: no game file is edited. Anything a script builds at run time is a clone (`construct_object` with a
-template), so it vanishes when the game closes and every mod start rebuilds it. The only shipped file is a small
-`.upk` with copies of BL2's own particle systems (cut out of the game's package with a reader/writer), because
-runtime-built particle materials draw as solid blue squares and a carried package avoids that.
+template), so it vanishes when the game closes and every mod start rebuilds it. The only extra file is a small
+`.upk` with copies of BL2's own particle systems, cut out of the game's package with a reader/writer (the format is in
+[reading UE3 Gearbox games offline](../../techniques/reading-ue3-gearbox-games-offline.md)), because runtime-built
+particle materials draw as solid blue squares and a carried package avoids that. That package is game content: build it
+from the player's own install, as this mod does at start (see Assets), and never redistribute the `.upk` itself.
 
 ## How the game works (what we had to learn)
 - **An element is several objects.** A damage type (with a damage-number colour and the "effective against" card
@@ -109,8 +114,8 @@ fights, co-op, and a thrown grenade's explosion on real enemies (the in-flight t
 
 ## Assets
 The gas, bubbles and smoke sprites were made by script (PIL) and the Geiger-counter blast sound is the player's own
-file, loaded as a Wwise event by a small audio mod. No game assets are shipped except the generated particle package
-(copies cut from the player's own install at start).
+file, loaded as a Wwise event by a small audio mod. No game assets ship with the mod: the particle package is cut
+from the player's own install at start (see Route), so a release needs only the code that builds it.
 
 ## Cost and time
 About three weeks of sessions; the last day was a long unattended test-and-fix run.
